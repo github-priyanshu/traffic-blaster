@@ -497,7 +497,7 @@ HumanScroll
     scroller.goto("footer", steps=4) # if second parameter is not give then its adaptive with max 3
 """`
 
-    downloadStringAsFile(variables.title+".py",file);
+    downloadStringAsFile(variables.title+"-"+variables.viewsCount+"-"+variables.domain+".py",file);
 }
 
 function downloadStringAsFile(filename, content, mimeType = 'text/plain') {
