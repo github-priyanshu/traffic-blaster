@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Traffic Blaster</title>
+
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/script.js"></script>
+</head>
+
+<body>
+  <style>
+    .head {
+      padding: 30px 0;
+    }
+
+    .configPan {
+      border: 2px solid #3982ff;
+      padding: 30px;
+      border-radius: 20px;
+      color: #0009;
+
+
+      & td {
+        padding: 10px;
+
+
+      }
+
+      & .inlineIns {
+        justify-content: flex-start;
+      }
+
+      & .inlineIns input {
+        width: 60px;
+        margin: 0px 10px 0 5px;
+      }
+
+      & textarea,
+      & select,
+      & input {
+        background-color: #fff;
+        border: 1px solid #a4c6ff;
+        padding: 5px 10px;
+        border-radius: 5px;
+        width: 230px;
+        margin: 2px;
+      }
+
+      & label {
+        display: block;
+      }
+    }
+  </style>
+  <h1 class="head">Traffic Blaster</h1>
+
+  <div class="navPan flex">
+
+    <div class="nav">Upload</div>
+
+    <div>
+      <a href="install-guide">Installation Guide</a>
+    </div>
+
+  </div>
+  <div class="lineMargin" m="20px"></div>
+
+  <div class="configPan">
+    <div class="form">
+      <form class="flex c">
+        <table>
+          <tr>
+            <td>
+              <label for="title">Title</label>
+              <input type="text" id="title">
+            </td>
+            <td>
+              <label for="domain">Domain</label>
+              <input type="text" id="domain">
+            </td>
+          </tr>
+
+          <tr>
+            <td>
+              <label for="viewsCount">No. of views</label>
+              <input type="number" min="0" id="viewsCount" oninput="generateClickAry()">
+            </td>
+            <td>
+              <div for="domain">Device Ratio</div>
+              <div class="inlineIns flex" id="deviceRationIns">
+                <div>
+                  <span>Desktop</span><input type="number" min="0" id="desktop" value="100">
+                </div>
+
+                <div>
+                  <span>Tablet</span><input type="number" min="0" id="tablet" value="0">
+                </div>
+
+                <div>
+                  <span>Mobile</span><input type="number" min="0" id="mobile" value="0">
+                </div>
+              </div>
+
+            </td>
+          </tr>
+
+          <tr>
+            <td>
+              <label for="keyword">Keyword</label>
+              <input type="text" id="keyword">
+            </td>
+
+            <td>
+              <div>Time on main page (s) <span col="#0003">(random)</span></div>
+
+              <div class="inlineIns flex" id="delayIns">
+                <div>
+                  <input type="number" min="0" oninput="generateClickAry()" id="delayFrom" placeholder="from" value="120">
+                </div>
+                to
+                <div>
+                  <input type="number" min="0" oninput="generateClickAry()" id="delayTo" placeholder="to" value="240">
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td>
+              <div>Delay between campaign(s) <span col="#0003">(random)</span></div>
+
+              <div class="inlineIns flex" id="delayIns">
+                <div>
+                  <input type="number" min="0" oninput="generateClickAry()" id="delayAfterFrom" placeholder="from" value="60">
+                </div>
+                to
+                <div>
+                  <input type="number" min="0" oninput="generateClickAry()" id="delayAfterTo" placeholder="to" value="120">
+                </div>
+              </div>
+            </td>
+          </tr>
+
+
+        </table>
+        <div class="lineMargin" m="30px"></div>
+
+        <div class="inputGroup w100p flex c" id="proxyIns">
+          <label for="proxyType">
+            Choose http proxy format:
+          </label>
+
+          <select id="proxyType">
+            <option value="0">server:username:password</option>
+            <option value="1">username:password@server</option>
+          </select>
+
+          <div class="lineMargin" m="20px"></div>
+
+          <label for="proxyList">Paste Proxies</label>
+          <textarea onchange="makeProxy()" id="proxyList" style="resize: none; height: 300px; width: 100%;"></textarea>
+          
+        </div>
+        <div class="lineMargin" m="15px"></div>
+        <p id="proxyImportedPan"></p>
+        <div class="lineMargin" m="15px"></div>
+
+        <button id="fileMakeBtn">Download & Start</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    resetFormat();
+    document.querySelectorAll("*[id]").forEach(val => {
+      var id = val.getAttribute("id");
+      window[id] = val;
+    })
+  </script>
+
+
+  <script>
+    fileMakeBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      makeFile();
+      downloadPythonCode();
+    })
+    var variables = {};
+
+    function generateClickAry(){
+      var clickAry=[];
+      variables.clicks=`[
+      `;
+
+      var delays={
+        onPageFrom: clearIns(delayFrom),
+        onPageTo: clearIns(delayTo),
+        afterPageFrom: clearIns(delayAfterFrom),
+        afterPageTo: clearIns(delayAfterTo),
+      }
+
+      for(let i=0; i<clearIns(viewsCount); i++){
+        var objx={
+          delayOnMainPage: randomBetween(delays.onPageFrom,delays.onPageTo),
+          delayAfter: randomBetween(delays.afterPageFrom,delays.afterPageTo),
+        }
+        variables.clicks+=`{"delayOnMainPage": ${objx.delayOnMainPage}, "delayAfter": ${objx.delayAfter}},
+        `;
+
+      }
+      variables.clicks+="]";
+    }
+    function reset() {
+      variables = {};
+    };
+
+    function makeFile() {
+      variables.title = clearIns(title);
+      variables.domain = clearIns(domain).replace("https://",'').replace("http://",'');
+      variables.keyword = clearIns(keyword);
+      variables.viewsCount = clearIns(viewsCount);
+
+      variables.desktop = clearIns(desktop);
+      variables.mobile = clearIns(mobile);
+      variables.tablet = clearIns(tablet);
+
+      variables.delayFrom = clearIns(delayFrom);
+      variables.delayTo = clearIns(delayTo);
+    }
+
+    function makeProxy() {
+      var str = `[
+      `;
+      var proxyCat = proxyType.value;
+      var proxies = proxyList.value.trim().replace("http://", "").replace("https://", "");
+
+      if ((proxyCat == '0' && proxies.includes("@")) || (proxyCat == '1' && !proxies.includes("@"))) {
+        alert("Proxy format mis-match");
+        return;
+      }
+      proxies=proxies.split("\n");
+
+      var includedProxy = 0;
+      for (let proxy of proxies) {
+        proxy = proxy.trim();
+        if ((proxyCat == '0' && proxy.includes("@")) || (proxyCat == '1' && !proxy.includes("@")) || (proxy == "")) {
+          continue;
+        }
+
+        proxy = objectifyProxy(proxy);
+        includedProxy++;
+        str += `{
+        "server": "${proxy.server}",
+        "username": "${proxy.username}",
+        "password": "${proxy.password}"
+    },
+    `
+      }
+      str += "]";
+      variables.proxy = str;
+      proxyImported(includedProxy);
+
+
+      function objectifyProxy(proxy) {
+        var obj = {};
+        if (proxyCat == 0) {
+          proxy = proxy.split(":");
+
+          obj.password = proxy[proxy.length - 1];
+          obj.username = proxy[proxy.length - 2];
+          obj.server = proxy.slice(0, proxy.length - 2).join(":");
+
+        } else if (proxyCat == 1) {
+          proxy = proxy.split("@");
+
+          obj.server = proxy[proxy.length - 1];
+          proxy = proxy[0].split(":");
+          obj.username = proxy[0];
+          obj.password = proxy[1];
+
+        }
+        return obj;
+      }
+
+      function proxyImported(n){
+        proxyImportedPan.innerHTML=n+" : Proxy Imported."
+      }
+
+    }
+
+    function clearIns(elem) {
+      return Number(elem.value.trim()) || elem.value.trim();
+    }
+
+    function randomBetween(n,m,digitAfterDecimal=0){
+      return (n+(Math.random() * (m-n))).toFixed(digitAfterDecimal);
+    }
+  </script>
+  <script src="js/pythonFile.js"></script>
+</body>
+
+</html>
